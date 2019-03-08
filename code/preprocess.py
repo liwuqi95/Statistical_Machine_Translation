@@ -31,7 +31,3 @@ def preprocess(in_sentence, language):
     modSent = 'SENTSTART ' + (re.sub(r" +", " ", modSent.strip())) + ' SENTEND'
 
     return modSent
-
-
-# Testing
-# print(preprocess("this is l'election and je t'aime and qu'on and puisqu'on and d'accord.", 'f'))

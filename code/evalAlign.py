@@ -19,7 +19,7 @@ discussion = """
 Discussion :
 
 {As n increases, the BLEU scores decrease since it adding more requirement for the translation.
- As we adding more sentences, most of the scores are increasing due to increasing amount of data. 
+ As we add more sentences, most of the scores increase due to increasing amount of data. 
  However, some of the scores decrease with more sentences, it may due to over fitting. }
 """
 
@@ -131,9 +131,6 @@ def main(args):
         data = open("../data/Hansard/Testing/Task5.f", "r")
         for line in data:
             eng_decoded.append(decode.decode(preprocess(line, 'f'), LM, AM))
-
-        for decoded in eng_decoded:
-            print(decoded)
 
         data = open("../data/Hansard/Testing/Task5.e", "r")
         for line in data:

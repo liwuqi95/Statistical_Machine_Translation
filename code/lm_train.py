@@ -37,10 +37,8 @@ def lm_train(data_dir, language, fn_LM):
                 data = open(fullFile)
 
                 for line in data:
-                    line = line.rstrip('\n')
                     sentence = preprocess(line, language)
-
-                    word_list = sentence.split(' ')
+                    word_list = sentence.split()
 
                     for i in range(len(word_list)):
                         word = word_list[i]

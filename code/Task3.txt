@@ -1,0 +1,29 @@
+MLE without Soothing:
+English: 13.75
+French: 13.72
+
+MLE with delta 0.00001
+English: 49.3
+French: 44.22
+
+MLE with delta 0.0001
+English: 43.07
+French: 39.35
+
+MLE with delta 0.001
+English: 39.45
+French: 37.10
+
+MLE with delta 0.01
+English: 41.80
+French: 41.3
+
+MLE with delta 0.1
+English: 60.03
+French: 64.5
+
+As we change delta, the perplexity seems decrease and increase.
+Act like a quadratic equation. The root cause for this is that, the delta is playing role at both denominator and numerator
+when we are calculating the probability. Also, the log function always increases as input increase.
+
+MLE increase a lot as we adding delta to the calculation. It helps to eliminate the infinity cases.

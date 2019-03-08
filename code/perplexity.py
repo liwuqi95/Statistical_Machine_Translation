@@ -27,6 +27,7 @@ def preplexity(LM, test_dir, language, smoothing=False, delta=0):
             continue
 
         opened_file = open(test_dir + ffile, "r")
+
         for line in opened_file:
             processed_line = preprocess(line, language)
             tpp = log_prob(processed_line, LM, smoothing, delta, vocab_size)
@@ -39,7 +40,3 @@ def preplexity(LM, test_dir, language, smoothing=False, delta=0):
         pp = 2 ** (-pp / N)
     return pp
 
-
-# test
-test_LM = lm_train('../data/Hansard/Training/', 'e', 'e_temp')
-print(preplexity(test_LM, "../data/Hansard/Testing/", "e"))

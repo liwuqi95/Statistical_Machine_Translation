@@ -1,8 +1,9 @@
 
 Discussion :
 
-{Enter your intriguing discussion (explaining observations/results) here}
-
+{As n increases, the BLEU scores decrease since it adding more requirement for the translation.
+ As we add more sentences, most of the scores increase due to increasing amount of data. 
+ However, some of the scores decrease with more sentences, it may due to over fitting. }
 
 
 ----------Evaluation START----------

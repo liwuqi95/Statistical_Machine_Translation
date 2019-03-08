@@ -19,7 +19,7 @@ def log_prob(sentence, LM, smoothing=False, delta=0, vocabSize=0):
 	log_prob :	(float) log probability of sentence
 	"""
 
-    word_list = sentence.split(' ')
+    word_list = sentence.split()
 
     prob = 1.0
 
