@@ -4,6 +4,7 @@ from preprocess import *
 from math import log
 import os
 
+
 def align_ibm1(train_dir, num_sentences, max_iter, fn_AM):
     """
 	Implements the training of IBM-1 word alignment algoirthm. 
@@ -24,20 +25,19 @@ def align_ibm1(train_dir, num_sentences, max_iter, fn_AM):
 	
 			LM['house']['maison'] = 0.5
 	"""
-    AM = {}
-    
-    # Read training data
-    
-    
-    # Initialize AM uniformly
+    eng, fre = read_hansard(train_dir, num_sentences)
 
-    
-    # Iterate between E and M steps
+    AM = initialize(eng, fre)
 
-    
+    for iter in range(max_iter):
+        AM = em_step(AM, eng, fre)
+
+    AM['SENTSTART'] = {'SENTSTART': 1}
+    AM['SENTEND'] = {'SENTEND': 1}
 
     return AM
-    
+
+
 # ------------ Support functions --------------
 def read_hansard(train_dir, num_sentences):
     """
@@ -54,18 +54,88 @@ def read_hansard(train_dir, num_sentences):
 	
 	Make sure to read the files in an aligned manner.
 	"""
-    # TODO
+    files = os.listdir(train_dir)
+    files.sort()
+
+    english = []
+    french = []
+
+    for file in files:
+        opened_file = open(train_dir + file, "r")
+        for line in opened_file:
+            if file[-1] == 'e':
+                if len(english) >= num_sentences:
+                    break
+                processed_line = preprocess(line, 'e')
+                english.append(processed_line.split(' '))
+            elif file[-1] == 'f':
+                if len(french) >= num_sentences:
+                    break
+                processed_line = preprocess(line, 'f')
+                french.append(processed_line.split(' '))
+
+        opened_file.close()
+    return english, french
+
 
 def initialize(eng, fre):
     """
 	Initialize alignment model uniformly.
 	Only set non-zero probabilities where word pairs appear in corresponding sentences.
 	"""
-	# TODO
-    
+    AM = {}
+
+    for i in range(len(eng)):
+        eng_sentence = eng[i]
+        fre_sentence = fre[i]
+
+        for j in range(1, len(eng_sentence) - 1):
+            if eng_sentence[j] not in AM:
+                AM[eng_sentence[j]] = {}
+
+            for k in range(1, len(fre_sentence) - 1):
+                if fre_sentence[k] not in AM[eng_sentence[j]]:
+                    AM[eng_sentence[j]][fre_sentence[k]] = 1.0
+
+    for i in AM:
+        v = len(AM[i])
+
+        for j in AM[i]:
+            AM[i][j] = 1 / v
+
+    return AM
+
+
 def em_step(t, eng, fre):
     """
 	One step in the EM algorithm.
 	Follows the pseudo-code given in the tutorial slides.
 	"""
-	# TODO
+
+    tcount = {}
+    total = {}
+    for i in t:
+        tcount[i] = {}
+        total[i] = 0.0
+        for j in t[i]:
+            tcount[i][j] = 0.0
+
+    for E, F in zip(eng, fre):
+        for f in list(set(F[1:-1])):
+            denom_c = 0
+            eset = list(set(E[1:-1]))
+            for e in eset:
+                denom_c += t[e][f] * F.count(f)
+            for e in eset:
+                sub = t[e][f] * F.count(f) * E.count(e) / denom_c
+                tcount[e][f] += sub
+                total[e] += sub
+
+    for e in t:
+        for f in t[e]:
+            t[e][f] = tcount[e][f] / total[e]
+
+    return t
+
+
+print(align_ibm1('../data/Hansard/Trying/', 2, 0, '.'))

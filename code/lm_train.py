@@ -60,13 +60,14 @@ def lm_train(data_dir, language, fn_LM):
                                 language_model['bi'][word][next_word] = language_model['bi'][word][next_word] + 1
                             else:
                                 language_model['bi'][word][next_word] = 1
+                data.close()
 
-                                # Save Model
+    # Save Model
     with open(fn_LM + '.pickle', 'wb') as handle:
         pickle.dump(language_model, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-
     return language_model
+
 
 # test
 lm_train('../data/Hansard/Trying/', 'e', 'english')
