@@ -1,7 +1,7 @@
 from lm_train import *
 from log_prob import *
 from preprocess import *
-from math import log
+import pickle
 import os
 
 
@@ -35,6 +35,9 @@ def align_ibm1(train_dir, num_sentences, max_iter, fn_AM):
     AM['SENTSTART'] = {'SENTSTART': 1}
     AM['SENTEND'] = {'SENTEND': 1}
 
+    with open(fn_AM + '.pickle', 'wb') as handle:
+        pickle.dump(AM, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
     return AM
 
 
@@ -61,6 +64,8 @@ def read_hansard(train_dir, num_sentences):
     french = []
 
     for file in files:
+        if files.count(file[0:-1] + 'e') + files.count(file[0:-1] + 'f') is not 2:
+            continue
         opened_file = open(train_dir + file, "r")
         for line in opened_file:
             if file[-1] == 'e':
@@ -137,5 +142,3 @@ def em_step(t, eng, fre):
 
     return t
 
-
-print(align_ibm1('../data/Hansard/Trying/', 2, 0, '.'))

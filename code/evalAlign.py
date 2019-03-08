@@ -3,17 +3,17 @@
 
 import argparse
 import _pickle as pickle
-
+import os
 import decode
 from align_ibm1 import *
 from BLEU_score import *
 from lm_train import *
+from preprocess import *
 
 __author__ = 'Raeid Saqur'
 __copyright__ = 'Copyright (c) 2018, Raeid Saqur'
 __email__ = 'raeidsaqur@cs.toronto.edu'
 __license__ = 'MIT'
-
 
 discussion = """
 Discussion :
@@ -21,6 +21,7 @@ Discussion :
 {Enter your intriguing discussion (explaining observations/results) here}
 
 """
+
 
 ##### HELPER FUNCTIONS ########
 def _getLM(data_dir, language, fn_LM, use_cached=True):
@@ -37,7 +38,12 @@ def _getLM(data_dir, language, fn_LM, use_cached=True):
     -------
     A language model 
     """
-    pass
+
+    if use_cached and os.path.isfile(fn_LM + '.pickle'):
+        return pickle.load(open(fn_LM + '.pickle', "rb"))
+    else:
+        return lm_train(data_dir, language, fn_LM)
+
 
 def _getAM(data_dir, num_sent, max_iter, fn_AM, use_cached=True):
     """
@@ -53,7 +59,11 @@ def _getAM(data_dir, num_sent, max_iter, fn_AM, use_cached=True):
     -------
     An alignment model 
     """
-    pass
+    if use_cached and os.path.isfile(fn_AM + '.pickle'):
+        return pickle.load(open(fn_AM + '.pickle', "rb"))
+    else:
+        return align_ibm1(data_dir, num_sent, max_iter, fn_AM)
+
 
 def _get_BLEU_scores(eng_decoded, eng, google_refs, n):
     """
@@ -68,8 +78,15 @@ def _get_BLEU_scores(eng_decoded, eng, google_refs, n):
     -------
     An array of evaluation (BLEU) scores for the sentences
     """
-    pass
-   
+
+    references = eng + google_refs
+    score = []
+
+    for eng in eng_decoded:
+        score.append(BLEU_score(eng, references, n))
+
+    return score
+
 
 def main(args):
     """
@@ -81,25 +98,48 @@ def main(args):
     It's entirely upto you how you want to write Task5.txt. This is just
     an (sparse) example.
     """
-    
 
     ## Write Results to Task5.txt (See e.g. Task5_eg.txt for ideation). ##
 
-    '''
     f = open("Task5.txt", 'w+')
-    f.write(discussion) 
+    f.write(discussion)
     f.write("\n\n")
     f.write("-" * 10 + "Evaluation START" + "-" * 10 + "\n")
 
+    train_dir = '../data/Hansard/Training/'
+
+    LM = _getLM(train_dir, 'e', '../cache/LM')
+
+    # AM_names = [1000, 10000, 15000, 30000]
+    AM_names = [1000]
+    AMs = []
+    for num_sent in AM_names:
+        AMs.append(_getAM(train_dir, num_sent, 2, f"../cache/{num_sent}_AM"))
+
     for i, AM in enumerate(AMs):
-        
+
         f.write(f"\n### Evaluating AM model: {AM_names[i]} ### \n")
-        # Decode using AM #
-        # Eval using 3 N-gram models #
+
+        eng_decoded = []
+        eng = []
+        google_refs = []
+
+        data = open("../data/Hansard/Testing/Task5.f", "r")
+        for line in data:
+            eng_decoded.append(decode.decode(preprocess(line, 'f'), LM, AM))
+
+        data = open("../data/Hansard/Testing/Task5.e", "r")
+        for line in data:
+            eng.append(preprocess(line, 'e'))
+
+        data = open("../data/Hansard/Testing/Task5.google.e", "r")
+        for line in data:
+            google_refs.append(preprocess(line, 'e'))
+
         all_evals = []
         for n in range(1, 4):
             f.write(f"\nBLEU scores with N-gram (n) = {n}: ")
-            evals = _get_BLEU_scores(...)
+            evals = _get_BLEU_scores(eng_decoded, eng, google_refs, n)
             for v in evals:
                 f.write(f"\t{v:1.4f}")
             all_evals.append(evals)
@@ -108,7 +148,7 @@ def main(args):
 
     f.write("-" * 10 + "Evaluation END" + "-" * 10 + "\n")
     f.close()
-    '''
+
     pass
 
 

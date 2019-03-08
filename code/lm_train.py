@@ -70,4 +70,4 @@ def lm_train(data_dir, language, fn_LM):
 
 
 # test
-lm_train('../data/Hansard/Trying/', 'e', 'english')
+# lm_train('../data/Hansard/Trying/', 'e', 'english')
