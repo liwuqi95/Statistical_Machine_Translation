@@ -67,7 +67,3 @@ def lm_train(data_dir, language, fn_LM):
         pickle.dump(language_model, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     return language_model
-
-
-# test
-# lm_train('../data/Hansard/Trying/', 'e', 'english')

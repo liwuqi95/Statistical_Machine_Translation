@@ -1,8 +1,7 @@
 import math
 
 
-
-def BLEU_score(candidate, references, n):
+def BLEU_score(candidate, references, n, brevity=False):
     """
     Calculate the BLEU score given a candidate sentence (string) and a list of reference sentences (list of strings). n specifies the level to calculate.
     n=1 unigram
@@ -22,32 +21,34 @@ def BLEU_score(candidate, references, n):
 	"""
 
     candidate_list = candidate.split()
-    reference_list = list(map(lambda x: x.split(), references))
 
-    len_difference = float('inf')
+    appear = 0
+    for i in range(len(candidate_list) - n + 1):
+        s = ''
+        for j in range(n):
+            s += (candidate_list[i + j] + ' ')
 
-    for reference in reference_list:
-        if abs(len(reference) - len(candidate)) < abs(len_difference):
-            len_difference = len(reference) - len(candidate)
+        for r in references:
+            if r.find(s.strip()) >= 0:
+                appear += 1
+                break
 
-    brevity = (len(candidate) + len_difference) / len(candidate)
+    p = (appear / (len(candidate_list) - n + 1))
 
-    BP = 1 if brevity < 1 else math.exp(1 - brevity)
 
-    p = 1.0
 
-    for gram in range(n):
-        not_appear = 0
-        for i in range(len(candidate_list) - gram):
-            s = ''
-            for j in range(gram):
-                s += (candidate_list[i + j] + ' ')
+    # calculate brevity
+    if brevity:
+        reference_list = list(map(lambda x: x.split(), references))
+        len_difference = float('inf')
 
-            for r in references:
-                if r.find(s.strip()) >= 0:
-                    continue
-            not_appear += 1
+        for reference in reference_list:
+            if abs(len(reference) - len(candidate_list)) < abs(len_difference):
+                len_difference = len(reference) - len(candidate_list)
 
-        p *= ((len(candidate_list) - gram - not_appear) / (len(candidate_list) - gram))
+        brevity = (len(candidate_list) + len_difference) / len(candidate_list)
 
-    return BP * pow(p, 1 / n)
+        BP = 1 if brevity < 1 else math.exp(1 - brevity)
+        p = BP * pow(p, 1 / n)
+
+    return p

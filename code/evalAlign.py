@@ -18,8 +18,9 @@ __license__ = 'MIT'
 discussion = """
 Discussion :
 
-{Enter your intriguing discussion (explaining observations/results) here}
-
+{As n increases, the BLEU scores decrease since it adding more requirement for the translation.
+ As we adding more sentences, most of the scores are increasing due to increasing amount of data. 
+ However, some of the scores decrease with more sentences, it may due to over fitting. }
 """
 
 
@@ -83,7 +84,10 @@ def _get_BLEU_scores(eng_decoded, eng, google_refs, n):
     score = []
 
     for eng in eng_decoded:
-        score.append(BLEU_score(eng, references, n))
+        p = 1
+        for i in range(1, n + 1):
+            p *= BLEU_score(eng, references, i, i == n)
+        score.append(p)
 
     return score
 
@@ -111,10 +115,10 @@ def main(args):
     LM = _getLM(train_dir, 'e', '../cache/LM')
 
     # AM_names = [1000, 10000, 15000, 30000]
-    AM_names = [1000]
+    AM_names = [1000, 10000, 15000, 30000]
     AMs = []
     for num_sent in AM_names:
-        AMs.append(_getAM(train_dir, num_sent, 2, f"../cache/{num_sent}_AM"))
+        AMs.append(_getAM(train_dir, num_sent, 10, f"../cache/{num_sent}_AM"))
 
     for i, AM in enumerate(AMs):
 
@@ -127,6 +131,9 @@ def main(args):
         data = open("../data/Hansard/Testing/Task5.f", "r")
         for line in data:
             eng_decoded.append(decode.decode(preprocess(line, 'f'), LM, AM))
+
+        for decoded in eng_decoded:
+            print(decoded)
 
         data = open("../data/Hansard/Testing/Task5.e", "r")
         for line in data:
